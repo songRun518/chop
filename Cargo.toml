@@ -1,0 +1,16 @@
+[package]
+name = "scoop_search"
+version = "2.0.1"
+edition = "2024"
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true
+
+[dependencies]
+colored = "3.0.0"
+crossterm = "0.29.0"
+rayon = "1.11.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.145"
