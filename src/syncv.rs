@@ -52,7 +52,6 @@ pub fn syncv() {
                 };
 
                 let width = crossterm::terminal::size().unwrap().0 as usize;
-                // TODO: coloed in name and description.
                 println!("┌{}┐", "─".repeat(width - 2));
                 println!("  {} in {}", background(appname), bucket_name.blue());
                 println!("  description: {}", background(&appinfo.description));
