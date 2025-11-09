@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use colored::Colorize;
 use serde::Deserialize;
 
-fn main() {
+pub fn syncv() {
     print!("Search an app: ");
     std::io::stdout().flush().unwrap();
 
