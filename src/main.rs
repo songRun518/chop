@@ -39,7 +39,7 @@ fn main() {
                         .send(Message::Info {
                             appname: appname.to_string(),
                             bucket_name: bucket_name.to_string(),
-                            more: appinfo,
+                            details: appinfo,
                         })
                         .unwrap();
                 }
@@ -55,7 +55,7 @@ enum Message {
     Info {
         appname: String,
         bucket_name: String,
-        more: AppInfo,
+        details: AppInfo,
     },
     Close,
 }
@@ -68,7 +68,7 @@ fn output(query: String, receiver: Receiver<Message>) {
         if let Message::Info {
             appname,
             bucket_name,
-            more,
+            details: detail,
         } = message
         {
             // U+2500	─
@@ -104,13 +104,13 @@ fn output(query: String, receiver: Receiver<Message>) {
             writeln!(
                 &mut buf_stdout,
                 "  description: {}",
-                backcolor(&more.description)
+                backcolor(&detail.description)
             )
             .unwrap();
-            writeln!(&mut buf_stdout, "  version: {}", more.version.cyan()).unwrap();
-            writeln!(&mut buf_stdout, "  homepage: {}", more.homepage.purple()).unwrap();
-            writeln!(&mut buf_stdout, "  license: {}", more.license.green()).unwrap();
-            if let Some(notes) = more.notes {
+            writeln!(&mut buf_stdout, "  version: {}", detail.version.cyan()).unwrap();
+            writeln!(&mut buf_stdout, "  homepage: {}", detail.homepage.purple()).unwrap();
+            writeln!(&mut buf_stdout, "  license: {}", detail.license.green()).unwrap();
+            if let Some(notes) = detail.notes {
                 writeln!(&mut buf_stdout, "  notes: {}", notes).unwrap();
             }
             writeln!(&mut buf_stdout, "└{}┘", "─".repeat(width - 2)).unwrap();
