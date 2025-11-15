@@ -1,5 +1,7 @@
-use std::io::{BufWriter, Write};
-use std::sync::mpsc::Receiver;
+use std::{
+    io::{BufWriter, Write},
+    sync::mpsc::Receiver,
+};
 
 use colored::Colorize;
 

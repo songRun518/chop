@@ -6,8 +6,10 @@ use std::sync::mpsc;
 use clap::arg;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-use crate::deserialize::{AppInfo, ScoopConfig};
-use crate::output::Message;
+use crate::{
+    deserialize::{AppInfo, ScoopConfig},
+    output::Message,
+};
 
 fn main() {
     let args = clap::command!()
