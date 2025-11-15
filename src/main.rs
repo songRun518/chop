@@ -78,7 +78,7 @@ fn output(query: String, receiver: Receiver<Message>) {
             // U+2514	└
             // U+2518	┘
 
-            let background = |s: &str| {
+            let backcolor = |s: &str| {
                 if let Some(i) = s.to_lowercase().find(&query) {
                     let j = i + query.chars().count();
                     format!(
@@ -97,14 +97,14 @@ fn output(query: String, receiver: Receiver<Message>) {
             writeln!(
                 &mut buf_stdout,
                 "  {} in {}",
-                background(&appname),
+                backcolor(&appname),
                 bucket_name.blue()
             )
             .unwrap();
             writeln!(
                 &mut buf_stdout,
                 "  description: {}",
-                background(&more.description)
+                backcolor(&more.description)
             )
             .unwrap();
             writeln!(&mut buf_stdout, "  version: {}", more.version.cyan()).unwrap();
