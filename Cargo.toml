@@ -8,10 +8,6 @@ codegen-units = 1
 lto = true
 strip = true
 
-[[test]]
-name = "test"
-path = "tests/test.rs"
-
 [dependencies]
 clap = { version = "4.5.51", features = ["cargo"] }
 colored = "3.0.0"
