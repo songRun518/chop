@@ -13,15 +13,17 @@ use crate::{
 
 fn main() {
     let args = clap::command!()
-        .args([arg!(<query> "Slice of application name")])
+        .arg(arg!(<query> "Slice of application name"))
+        .arg(arg!(root_path: -p [path] ... "Root path of scoop"))
         .get_matches();
     let query = args.get_one::<String>("query").unwrap();
+    let root_path = args.get_one::<String>("root_path");
 
     let query_copy = query.to_string();
     let (sender, receiver) = mpsc::channel::<Message>();
     let handle = std::thread::spawn(move || output::worker(query_copy, receiver));
 
-    let buckets = ScoopConfig::buckets_path();
+    let buckets = ScoopConfig::buckets_path(root_path);
     for bucket in buckets.read_dir().unwrap() {
         let bucket = bucket.unwrap();
         let bucket_name = bucket.file_name();

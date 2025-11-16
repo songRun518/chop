@@ -8,8 +8,14 @@ pub struct ScoopConfig {
 }
 
 impl ScoopConfig {
-    pub fn buckets_path() -> PathBuf {
-        let userprofile: PathBuf = std::env::var("userprofile").unwrap().into();
+    pub fn buckets_path(root_path: Option<&String>) -> PathBuf {
+        if let Some(root_path) = root_path {
+            return PathBuf::from(root_path).join("buckets");
+        }
+
+        let userprofile: PathBuf = std::env::var("userprofile")
+            .expect("Please give scoop root path by `-p`")
+            .into();
         let config_file_path = userprofile.join(".config/scoop/config.json");
         let config_buf = std::fs::read(&config_file_path).unwrap();
         let config = serde_json::from_slice::<ScoopConfig>(&config_buf).unwrap();
