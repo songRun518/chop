@@ -3,7 +3,7 @@ mod output;
 
 use std::sync::mpsc;
 
-use clap::arg;
+use clap::{Parser, arg};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use crate::{
@@ -22,12 +22,9 @@ struct ArgParser {
 }
 
 fn main() {
-    let args = clap::command!()
-        .arg(arg!(<query> "Slice of application name"))
-        .arg(arg!(root_path: -p [path] ... "Root path of scoop"))
-        .get_matches();
-    let query = args.get_one::<String>("query").unwrap();
-    let root_path = args.get_one::<String>("root_path");
+    let args = ArgParser::parse();
+    let query = &args.query;
+    let root_path = args.root_path.as_ref();
 
     let query_copy = query.to_string();
     let (sender, receiver) = mpsc::channel::<Message>();
