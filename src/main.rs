@@ -3,7 +3,7 @@ mod output;
 
 use std::sync::mpsc;
 
-use clap::{Parser, arg};
+use clap::Parser;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use crate::{
