@@ -1,4 +1,22 @@
+use std::path::PathBuf;
+
+use anyhow::Context;
 use serde::Deserialize;
+
+#[derive(Debug, Deserialize)]
+pub struct ScoopConfig {
+    pub root_path: PathBuf,
+}
+impl ScoopConfig {
+    pub fn new() -> anyhow::Result<Self> {
+        let userprofile: PathBuf = std::env::var("userprofile")
+            .context("Failed to get `userprofile` env variable")?
+            .into();
+        let config_path = userprofile.join(".config/scoop/config.json");
+        serde_json::from_slice(&std::fs::read(&config_path).context("Failed to read scoop config")?)
+            .context("Failed to deserialize scoop config")
+    }
+}
 
 #[derive(Debug, Deserialize)]
 pub struct Manifest {
