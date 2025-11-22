@@ -11,6 +11,16 @@ use crate::{
     output::Message,
 };
 
+#[derive(clap::Parser)]
+#[command( version, about, long_about = None)]
+struct ArgParser {
+    #[arg(value_name = "QUERY")]
+    query: String,
+
+    #[arg(short = 'p', long, value_name = "PATH")]
+    root_path: Option<String>,
+}
+
 fn main() {
     let args = clap::command!()
         .arg(arg!(<query> "Slice of application name"))

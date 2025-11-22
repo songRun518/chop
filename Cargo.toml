@@ -9,7 +9,7 @@ lto = true
 strip = true
 
 [dependencies]
-clap = { version = "4.5.51", features = ["cargo"] }
+clap = { version = "4.5.51", features = ["cargo", "derive"] }
 colored = "3.0.0"
 crossterm = "0.29.0"
 rayon = "1.11.0"
