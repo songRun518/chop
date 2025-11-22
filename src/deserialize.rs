@@ -14,7 +14,10 @@ pub struct Manifest {
 #[serde(untagged)]
 pub enum License {
     String(String),
-    Object { identifier: String, url: String },
+    Object {
+        identifier: String,
+        url: Option<String>,
+    },
 }
 
 #[derive(Debug, Deserialize)]
