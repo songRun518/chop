@@ -12,12 +12,11 @@ use crate::{
 };
 
 #[derive(clap::Parser)]
-#[command( version, about, long_about = None)]
+#[command(arg_required_else_help = true)]
 struct ArgParser {
-    #[arg(value_name = "QUERY")]
     query: String,
 
-    #[arg(short = 'p', long, value_name = "PATH")]
+    #[arg(short = 'p', long)]
     root_path: Option<String>,
 }
 
