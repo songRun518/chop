@@ -1,5 +1,6 @@
 [package]
 name = "chop"
+description = "Enhance `scoop search` and `scoop info`"
 version = "3.0.0"
 edition = "2024"
 
@@ -9,9 +10,11 @@ lto = true
 strip = true
 
 [dependencies]
+ratatui = "0.29.0"
 clap = { version = "4.5.51", features = ["derive"] }
-colored = "3.0.0"
-crossterm = "0.29.0"
-rayon = "1.11.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
+
+[[test]]
+name = "test_mod"
+path = "test/mod.rs"
