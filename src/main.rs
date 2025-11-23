@@ -1,3 +1,6 @@
+mod deserialize;
+mod search;
+
 use std::path::PathBuf;
 
 use clap::Parser;
@@ -6,13 +9,12 @@ use ratatui::{
     layout::{Constraint, Layout},
     style::{Style, Stylize},
     text::{Line, Span, Text},
-    widgets::{Block, List, ListItem, ListState, Paragraph, Wrap},
+    widgets::{Block, List, ListItem, ListState, Paragraph, Widget, Wrap},
 };
 
-mod deserialize;
-mod search;
+use crate::search::AppInfo;
 
-#[derive(Debug, serde::Deserialize, clap::Parser)]
+#[derive(Debug, Parser)]
 #[command(arg_required_else_help = true)]
 struct ArgParser {
     query: String,
@@ -43,29 +45,6 @@ fn main() -> anyhow::Result<()> {
             );
 
             let appinfo = &apps[list_state.selected().unwrap_or(0)];
-            let (appname0, appname1, appname2) = {
-                let i = appinfo
-                    .name
-                    .to_lowercase()
-                    .find(&args.query.to_lowercase())
-                    .unwrap();
-                let j = i + appinfo.name.chars().count();
-                (
-                    Span::from(&appinfo.name[..i]),
-                    Span::from(&appinfo.name[i..j]).yellow(),
-                    Span::from(&appinfo.name[j..]),
-                )
-            };
-            let txt = Text::from(vec![
-                Line::from_iter([Span::from(&appinfo.version).cyan()]),
-                Line::from(format!("  {}", appinfo.description)),
-                Line::from_iter([Span::from("\u{1F517}  "), Span::from(&appinfo.homepage)]),
-                Line::from_iter([Span::from("\u{2696}   "), Span::from(&appinfo.license)]),
-                Line::from(appinfo.notes.as_str()),
-            ]);
-            let para = Paragraph::new(txt)
-                .block(Block::bordered())
-                .wrap(Wrap { trim: false });
 
             let layout = Layout::new(
                 ratatui::layout::Direction::Horizontal,
@@ -74,7 +53,13 @@ fn main() -> anyhow::Result<()> {
             .split(f.area());
 
             f.render_stateful_widget(list, layout[0], &mut list_state);
-            f.render_widget(para, layout[1]);
+            f.render_widget(
+                AppInfoWidget {
+                    query: &args.query,
+                    info: appinfo,
+                },
+                layout[1],
+            );
         })?;
 
         if let Ok(evt) = event::read()
@@ -99,4 +84,68 @@ fn main() -> anyhow::Result<()> {
 
     ratatui::restore();
     Ok(())
+}
+
+struct AppInfoWidget<'a, 'b> {
+    query: &'a str,
+    info: &'b AppInfo,
+}
+
+impl<'a, 'b> Widget for AppInfoWidget<'a, 'b> {
+    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
+    where
+        Self: Sized,
+    {
+        let name_l = if let Some(i) = self.info.name.to_lowercase().find(self.query) {
+            let j = i + self.query.chars().count();
+            Line::from_iter([
+                Span::from(format!("{}/", self.info.bucket)),
+                Span::from(&self.info.name[..i]),
+                Span::from(&self.info.name[i..j]).yellow().bold(),
+                Span::from(&self.info.name[j..]),
+                Span::from(format!("  {}", self.info.version)).cyan(),
+            ])
+        } else {
+            Line::from_iter([
+                Span::from(format!("{}/", self.info.bucket)),
+                Span::from(&self.info.name),
+                Span::from(format!("  {}", self.info.version)).cyan(),
+            ])
+        };
+
+        let description_l = if let Some(i) = self.info.description.to_lowercase().find(self.query) {
+            let j = i + self.query.chars().count();
+            Line::from_iter([
+                Span::from("    "),
+                Span::from(&self.info.description[..i]),
+                Span::from(&self.info.description[i..j]).yellow().bold(),
+                Span::from(&self.info.description[j..]),
+            ])
+        } else {
+            Line::from_iter([Span::from("    "), Span::from(&self.info.description)])
+        };
+
+        let homepage_l = Line::from_iter([
+            Span::from("\u{1F310}  "),
+            Span::from(&self.info.homepage).magenta(),
+        ]);
+
+        let license_l = Line::from_iter([
+            Span::from("\u{1F4DC}  "),
+            Span::from(&self.info.license).green(),
+        ]);
+
+        let notes_l = if let Some(notes) = &self.info.notes {
+            Line::from_iter([Span::from("\u{1F4DA}  "), Span::from(notes)])
+        } else {
+            Line::default()
+        };
+
+        let text = Text::from_iter([name_l, description_l, homepage_l, license_l, notes_l]);
+        let para = Paragraph::new(text)
+            .block(Block::bordered())
+            .wrap(Wrap { trim: false });
+
+        para.render(area, buf);
+    }
 }
