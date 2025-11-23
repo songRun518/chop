@@ -1,7 +1,10 @@
+use std::path::PathBuf;
+
+use clap::Parser;
 use ratatui::{
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
     layout::{Constraint, Layout},
-    style::Style,
+    style::{Style, Stylize},
     text::{Line, Span, Text},
     widgets::{Block, List, ListItem, ListState, Paragraph, Wrap},
 };
@@ -9,8 +12,18 @@ use ratatui::{
 mod deserialize;
 mod search;
 
+#[derive(Debug, serde::Deserialize, clap::Parser)]
+#[command(arg_required_else_help = true)]
+struct ArgParser {
+    query: String,
+
+    #[arg(short = 'p', long)]
+    scoop_root_path: Option<PathBuf>,
+}
+
 fn main() -> anyhow::Result<()> {
-    let apps = search::search()?;
+    let args = ArgParser::parse();
+    let apps = search::search(&args)?;
 
     let mut terminal = ratatui::init();
 
@@ -30,11 +43,21 @@ fn main() -> anyhow::Result<()> {
             );
 
             let appinfo = &apps[list_state.selected().unwrap_or(0)];
+            let (appname0, appname1, appname2) = {
+                let i = appinfo
+                    .name
+                    .to_lowercase()
+                    .find(&args.query.to_lowercase())
+                    .unwrap();
+                let j = i + appinfo.name.chars().count();
+                (
+                    Span::from(&appinfo.name[..i]),
+                    Span::from(&appinfo.name[i..j]).yellow(),
+                    Span::from(&appinfo.name[j..]),
+                )
+            };
             let txt = Text::from(vec![
-                Line::from_iter([
-                    Span::from(format!("{} in {}  ", appinfo.name, &appinfo.bucket,)),
-                    Span::from(&appinfo.version),
-                ]),
+                Line::from_iter([Span::from(&appinfo.version).cyan()]),
                 Line::from(format!("  {}", appinfo.description)),
                 Line::from_iter([Span::from("\u{1F517}  "), Span::from(&appinfo.homepage)]),
                 Line::from_iter([Span::from("\u{2696}   "), Span::from(&appinfo.license)]),
