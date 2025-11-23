@@ -55,12 +55,11 @@ pub fn search(args: &crate::ArgParser) -> anyhow::Result<Vec<AppInfo>> {
 pub struct AppInfo {
     pub name: String,
     pub bucket: String,
-
     pub version: String,
     pub description: String,
     pub homepage: String,
     pub license: String,
-    pub notes: String,
+    pub notes: Option<String>,
 }
 
 impl From<(String, String, AppManifest)> for AppInfo {
@@ -70,15 +69,11 @@ impl From<(String, String, AppManifest)> for AppInfo {
         Self {
             name,
             bucket,
-
             version: manifest.version,
             description: manifest.description,
             homepage: manifest.homepage,
             license: manifest.license.to_string(),
-            notes: manifest
-                .notes
-                .map(|notes| "\u{1F4D2}  ".to_string() + &notes.to_string())
-                .unwrap_or(String::new()),
+            notes: manifest.notes.map(|notes| notes.to_string()),
         }
     }
 }
