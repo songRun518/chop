@@ -1,26 +1,15 @@
-use std::path::PathBuf;
-
-use anyhow::{Context, Ok};
-use clap::Parser;
+use anyhow::Context;
 
 use crate::deserialize::{AppManifest, ScoopConfig};
 
-#[derive(Debug, serde::Deserialize, clap::Parser)]
-#[command(arg_required_else_help = true)]
-struct ArgParser {
-    query: String,
-
-    #[arg(short = 'p', long)]
-    scoop_root_path: Option<PathBuf>,
-}
-
-pub fn search() -> anyhow::Result<Vec<AppInfo>> {
-    let args = ArgParser::parse();
+pub fn search(args: &crate::ArgParser) -> anyhow::Result<Vec<AppInfo>> {
     let query = &args.query;
 
+    let scoop_config = ScoopConfig::new()?;
     let scoop_root_path = args
         .scoop_root_path
-        .unwrap_or(ScoopConfig::new()?.root_path);
+        .as_ref()
+        .unwrap_or(&scoop_config.root_path);
     let scoop_buckets_path = scoop_root_path.join("buckets");
 
     let mut apps = Vec::with_capacity(50);
