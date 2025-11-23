@@ -20,7 +20,7 @@ impl ScoopConfig {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Manifest {
+pub struct AppManifest {
     pub version: String,
     pub description: String,
     pub homepage: String,
@@ -47,7 +47,7 @@ pub enum Notes {
 mod test {
     use std::path::PathBuf;
 
-    use crate::deserialize::Manifest;
+    use crate::deserialize::AppManifest;
 
     #[test]
     fn deserialize_all() {
@@ -67,7 +67,7 @@ mod test {
 
         for path in v {
             let bytes = std::fs::read(&path).unwrap();
-            serde_json::from_slice::<Manifest>(&bytes).unwrap_or_else(|err| {
+            serde_json::from_slice::<AppManifest>(&bytes).unwrap_or_else(|err| {
                 dbg!(&path);
                 panic!("{err}");
             });
