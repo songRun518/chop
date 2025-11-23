@@ -7,6 +7,7 @@ use serde::Deserialize;
 pub struct ScoopConfig {
     pub root_path: PathBuf,
 }
+
 impl ScoopConfig {
     pub fn new() -> anyhow::Result<Self> {
         let userprofile: PathBuf = std::env::var("userprofile")
@@ -32,10 +33,7 @@ pub struct Manifest {
 #[serde(untagged)]
 pub enum License {
     String(String),
-    Object {
-        identifier: String,
-        url: Option<String>,
-    },
+    Object { identifier: String },
 }
 
 #[derive(Debug, Deserialize)]
@@ -43,4 +41,36 @@ pub enum License {
 pub enum Notes {
     String(String),
     Array(Vec<String>),
+}
+
+#[cfg(test)]
+mod test {
+    use std::path::PathBuf;
+
+    use crate::deserialize::Manifest;
+
+    #[test]
+    fn deserialize_all() {
+        let v = PathBuf::from("D:/home/apps/scoop/buckets")
+            .read_dir()
+            .unwrap()
+            .map(|re| re.unwrap())
+            .flat_map(|bucket| {
+                bucket
+                    .path()
+                    .join("bucket")
+                    .read_dir()
+                    .unwrap()
+                    .map(|re| re.unwrap().path())
+            })
+            .collect::<Vec<_>>();
+
+        for path in v {
+            let bytes = std::fs::read(&path).unwrap();
+            serde_json::from_slice::<Manifest>(&bytes).unwrap_or_else(|err| {
+                dbg!(&path);
+                panic!("{err}");
+            });
+        }
+    }
 }
