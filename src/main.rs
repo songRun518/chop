@@ -27,6 +27,11 @@ fn main() -> anyhow::Result<()> {
     let args = ArgParser::parse();
     let apps = search::search(&args)?;
 
+    if apps.is_empty() {
+        println!("No matches found");
+        return Ok(());
+    }
+
     let mut terminal = ratatui::init();
 
     let mut list_state = ListState::default();
