@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{fmt::Display, path::PathBuf};
 
 use anyhow::Context;
 use serde::Deserialize;
@@ -36,11 +36,31 @@ pub enum License {
     Object { identifier: String },
 }
 
+impl Display for License {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::String(s) => s,
+            Self::Object { identifier: s } => s,
+        };
+        write!(f, "{s}")
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Notes {
     String(String),
     Array(Vec<String>),
+}
+
+impl Display for Notes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            Self::String(s) => s,
+            Self::Array(v) => &v.join(""),
+        };
+        write!(f, "{s}")
+    }
 }
 
 #[cfg(test)]
