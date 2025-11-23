@@ -88,7 +88,7 @@ impl From<(String, String, AppManifest)> for AppInfo {
             license: manifest.license.to_string(),
             notes: manifest
                 .notes
-                .map(|notes| notes.to_string())
+                .map(|notes| "\u{1F4D2}  ".to_string() + &notes.to_string())
                 .unwrap_or(String::new()),
         }
     }
