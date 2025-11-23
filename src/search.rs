@@ -47,7 +47,12 @@ pub fn search() -> anyhow::Result<Vec<AppInfo>> {
                 )
                 .context(format!("Failed to deserialize `{appname}`"))?;
 
-                if appname.contains(query) || manifest.description.contains(query) {
+                if appname.to_lowercase().contains(&query.to_lowercase())
+                    || manifest
+                        .description
+                        .to_lowercase()
+                        .contains(&query.to_lowercase())
+                {
                     apps.push((appname, bucket_name.clone(), manifest).into());
                 }
             }
