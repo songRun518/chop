@@ -67,7 +67,7 @@ fn main() -> anyhow::Result<()> {
             && key.kind == KeyEventKind::Press
         {
             match key.code {
-                KeyCode::Char('q') => break 'tui,
+                KeyCode::Char('q') | KeyCode::Esc => break 'tui,
 
                 KeyCode::Up => {
                     list_state.select(Some(list_state.selected().unwrap_or(0).saturating_sub(1)));
