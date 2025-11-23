@@ -71,7 +71,7 @@ pub struct AppInfo {
     pub description: String,
     pub homepage: String,
     pub license: String,
-    pub notes: Option<String>,
+    pub notes: String,
 }
 
 impl From<(String, String, AppManifest)> for AppInfo {
@@ -86,7 +86,10 @@ impl From<(String, String, AppManifest)> for AppInfo {
             description: manifest.description,
             homepage: manifest.homepage,
             license: manifest.license.to_string(),
-            notes: manifest.notes.map(|notes| notes.to_string()),
+            notes: manifest
+                .notes
+                .map(|notes| notes.to_string())
+                .unwrap_or(String::new()),
         }
     }
 }
