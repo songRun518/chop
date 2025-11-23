@@ -51,7 +51,7 @@ pub fn search(args: &crate::ArgParser) -> anyhow::Result<Vec<AppInfo>> {
     Ok(apps)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AppInfo {
     pub name: String,
     pub bucket: String,
