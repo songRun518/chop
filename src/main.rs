@@ -22,7 +22,7 @@ struct ArgParser {
     query: String,
 
     #[arg(short = 'p', long)]
-    scoop_root_path: Option<PathBuf>,
+    root_path: Option<PathBuf>,
 }
 
 fn main() -> Result<(), MyError> {

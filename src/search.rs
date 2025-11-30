@@ -3,13 +3,18 @@ use crate::{error::MyError, manifest::AppManifest};
 pub fn search(args: &crate::ArgParser) -> Result<Vec<AppInfo>, MyError> {
     let query = &args.query;
 
-    let scoop_config = crate::config::load();
-    let scoop_root_path = args.scoop_root_path.clone().unwrap();
-    let scoop_buckets_path = scoop_root_path.join("buckets");
+    let config = crate::config::load();
+    let root_path = if let Some(root_path) = args.root_path.clone() {
+        root_path
+    } else {
+        config.ok_or(MyError::ScoopNotFound)?.root_path
+    };
+
+    let buckets_path = root_path.join("buckets");
 
     let mut apps = Vec::with_capacity(50);
 
-    for ele in scoop_buckets_path.read_dir()? {
+    for ele in buckets_path.read_dir()? {
         let bucket = ele?;
         let bucket_name = bucket.file_name().display().to_string();
 
