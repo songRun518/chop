@@ -6,7 +6,7 @@ use ratatui::{
     layout::{Constraint, Layout},
     style::{Style, Stylize},
     text::{Line, Span, Text},
-    widgets::{Block, List, ListItem, ListState, Paragraph, Widget, Wrap},
+    widgets::{Block, List, ListItem, ListState, Paragraph, Wrap},
 };
 
 use crate::{error::MyError, search::AppInfo};
@@ -71,9 +71,7 @@ fn main() -> Result<(), MyError> {
                 KeyCode::Char('q') | KeyCode::Esc => break 'tui,
 
                 KeyCode::Up => {
-                    list_state.select(Some(
-                        list_state.selected().unwrap_or(0).saturating_sub(1),
-                    ));
+                    list_state.select(Some(list_state.selected().unwrap_or(0).saturating_sub(1)));
                 }
                 KeyCode::Down => {
                     list_state.select(Some(
@@ -129,8 +127,7 @@ fn render_appinfo(
         Span::from(&info.homepage).magenta(),
     ]);
 
-    let license_l =
-        Line::from_iter([Span::from("\u{1F4DC}  "), Span::from(&info.license).green()]);
+    let license_l = Line::from_iter([Span::from("\u{1F4DC}  "), Span::from(&info.license).green()]);
 
     let notes_l = if let Some(notes) = &info.notes {
         Line::from_iter([Span::from("\u{1F4DA}  "), Span::from(notes)])
