@@ -1,6 +1,3 @@
-mod deserialize;
-mod search;
-
 use std::path::PathBuf;
 
 use clap::Parser;
@@ -13,6 +10,11 @@ use ratatui::{
 };
 
 use crate::search::AppInfo;
+
+mod config;
+mod error;
+mod manifest;
+mod search;
 
 #[derive(Debug, Parser)]
 #[command(arg_required_else_help = true)]

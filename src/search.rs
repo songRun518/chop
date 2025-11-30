@@ -1,15 +1,12 @@
 use anyhow::Context;
 
-use crate::deserialize::{AppManifest, ScoopConfig};
+use crate::manifest::AppManifest;
 
 pub fn search(args: &crate::ArgParser) -> anyhow::Result<Vec<AppInfo>> {
     let query = &args.query;
 
-    let scoop_config = ScoopConfig::new()?;
-    let scoop_root_path = args
-        .scoop_root_path
-        .as_ref()
-        .unwrap_or(&scoop_config.root_path);
+    let scoop_config = crate::config::load();
+    let scoop_root_path = args.scoop_root_path.clone().unwrap();
     let scoop_buckets_path = scoop_root_path.join("buckets");
 
     let mut apps = Vec::with_capacity(50);
