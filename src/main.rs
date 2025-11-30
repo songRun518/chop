@@ -75,7 +75,9 @@ fn main() -> anyhow::Result<()> {
                 KeyCode::Char('q') | KeyCode::Esc => break 'tui,
 
                 KeyCode::Up => {
-                    list_state.select(Some(list_state.selected().unwrap_or(0).saturating_sub(1)));
+                    list_state.select(Some(
+                        list_state.selected().unwrap_or(0).saturating_sub(1),
+                    ));
                 }
                 KeyCode::Down => {
                     list_state.select(Some(
@@ -118,17 +120,18 @@ impl<'a, 'b> Widget for AppInfoWidget<'a, 'b> {
             ])
         };
 
-        let description_l = if let Some(i) = self.info.description.to_lowercase().find(self.query) {
-            let j = i + self.query.chars().count();
-            Line::from_iter([
-                Span::from("    "),
-                Span::from(&self.info.description[..i]),
-                Span::from(&self.info.description[i..j]).yellow().bold(),
-                Span::from(&self.info.description[j..]),
-            ])
-        } else {
-            Line::from_iter([Span::from("    "), Span::from(&self.info.description)])
-        };
+        let description_l =
+            if let Some(i) = self.info.description.to_lowercase().find(self.query) {
+                let j = i + self.query.chars().count();
+                Line::from_iter([
+                    Span::from("    "),
+                    Span::from(&self.info.description[..i]),
+                    Span::from(&self.info.description[i..j]).yellow().bold(),
+                    Span::from(&self.info.description[j..]),
+                ])
+            } else {
+                Line::from_iter([Span::from("    "), Span::from(&self.info.description)])
+            };
 
         let homepage_l = Line::from_iter([
             Span::from("\u{1F310}  "),
@@ -146,7 +149,8 @@ impl<'a, 'b> Widget for AppInfoWidget<'a, 'b> {
             Line::default()
         };
 
-        let text = Text::from_iter([name_l, description_l, homepage_l, license_l, notes_l]);
+        let text =
+            Text::from_iter([name_l, description_l, homepage_l, license_l, notes_l]);
         let para = Paragraph::new(text)
             .block(Block::bordered())
             .wrap(Wrap { trim: false });

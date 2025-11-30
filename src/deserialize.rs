@@ -14,8 +14,10 @@ impl ScoopConfig {
             .context("Failed to get `userprofile` env variable")?
             .into();
         let config_path = userprofile.join(".config/scoop/config.json");
-        serde_json::from_slice(&std::fs::read(&config_path).context("Failed to read scoop config")?)
-            .context("Failed to deserialize scoop config")
+        serde_json::from_slice(
+            &std::fs::read(&config_path).context("Failed to read scoop config")?,
+        )
+        .context("Failed to deserialize scoop config")
     }
 }
 
