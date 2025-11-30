@@ -1,23 +1,6 @@
-use std::{fmt::Display, path::PathBuf};
+use std::fmt::Display;
 
-use anyhow::Context;
 use serde::Deserialize;
-
-#[derive(Debug, Deserialize)]
-pub struct ScoopConfig {
-    pub root_path: PathBuf,
-}
-
-impl ScoopConfig {
-    pub fn new() -> anyhow::Result<Self> {
-        let userprofile: PathBuf = std::env::var("userprofile")
-            .context("Failed to get `userprofile` env variable")?
-            .into();
-        let config_path = userprofile.join(".config/scoop/config.json");
-        serde_json::from_slice(&std::fs::read(&config_path).context("Failed to read scoop config")?)
-            .context("Failed to deserialize scoop config")
-    }
-}
 
 #[derive(Debug, Deserialize)]
 pub struct AppManifest {
@@ -67,11 +50,11 @@ impl Display for Notes {
 mod test {
     use std::path::PathBuf;
 
-    use crate::deserialize::AppManifest;
+    use crate::manifest::AppManifest;
 
     #[test]
     fn deserialize_all() {
-        let v = PathBuf::from("D:/home/apps/scoop/buckets")
+        let v = PathBuf::from("/home/songrun/Documents/scoopRoot/buckets")
             .read_dir()
             .unwrap()
             .map(|re| re.unwrap())

@@ -1,6 +1,3 @@
-mod deserialize;
-mod search;
-
 use std::path::PathBuf;
 
 use clap::Parser;
@@ -9,10 +6,15 @@ use ratatui::{
     layout::{Constraint, Layout},
     style::{Style, Stylize},
     text::{Line, Span, Text},
-    widgets::{Block, List, ListItem, ListState, Paragraph, Widget, Wrap},
+    widgets::{Block, List, ListItem, ListState, Paragraph, Wrap},
 };
 
-use crate::search::AppInfo;
+use crate::{error::MyError, search::AppInfo};
+
+mod config;
+mod error;
+mod manifest;
+mod search;
 
 #[derive(Debug, Parser)]
 #[command(arg_required_else_help = true)]
@@ -20,10 +22,10 @@ struct ArgParser {
     query: String,
 
     #[arg(short = 'p', long)]
-    scoop_root_path: Option<PathBuf>,
+    root_path: Option<PathBuf>,
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<(), MyError> {
     let args = ArgParser::parse();
     let apps = search::search(&args)?;
 
@@ -58,13 +60,7 @@ fn main() -> anyhow::Result<()> {
             .split(f.area());
 
             f.render_stateful_widget(list, layout[0], &mut list_state);
-            f.render_widget(
-                AppInfoWidget {
-                    query: &args.query,
-                    info: appinfo,
-                },
-                layout[1],
-            );
+            render_appinfo(&args.query, appinfo, f, layout[1]);
         })?;
 
         if let Ok(evt) = event::read()
@@ -91,66 +87,58 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-struct AppInfoWidget<'a, 'b> {
-    query: &'a str,
-    info: &'b AppInfo,
-}
+fn render_appinfo(
+    query: &str,
+    info: &AppInfo,
+    f: &mut ratatui::Frame,
+    area: ratatui::prelude::Rect,
+) {
+    let name_l = if let Some(i) = info.name.to_lowercase().find(query) {
+        let j = i + query.chars().count();
+        Line::from_iter([
+            Span::from(format!("{}/", info.bucket)),
+            Span::from(&info.name[..i]),
+            Span::from(&info.name[i..j]).yellow().bold(),
+            Span::from(&info.name[j..]),
+            Span::from(format!("  {}", info.version)).cyan(),
+        ])
+    } else {
+        Line::from_iter([
+            Span::from(format!("{}/", info.bucket)),
+            Span::from(&info.name),
+            Span::from(format!("  {}", info.version)).cyan(),
+        ])
+    };
 
-impl<'a, 'b> Widget for AppInfoWidget<'a, 'b> {
-    fn render(self, area: ratatui::prelude::Rect, buf: &mut ratatui::prelude::Buffer)
-    where
-        Self: Sized,
-    {
-        let name_l = if let Some(i) = self.info.name.to_lowercase().find(self.query) {
-            let j = i + self.query.chars().count();
-            Line::from_iter([
-                Span::from(format!("{}/", self.info.bucket)),
-                Span::from(&self.info.name[..i]),
-                Span::from(&self.info.name[i..j]).yellow().bold(),
-                Span::from(&self.info.name[j..]),
-                Span::from(format!("  {}", self.info.version)).cyan(),
-            ])
-        } else {
-            Line::from_iter([
-                Span::from(format!("{}/", self.info.bucket)),
-                Span::from(&self.info.name),
-                Span::from(format!("  {}", self.info.version)).cyan(),
-            ])
-        };
+    let description_l = if let Some(i) = info.description.to_lowercase().find(query) {
+        let j = i + query.chars().count();
+        Line::from_iter([
+            Span::from("    "),
+            Span::from(&info.description[..i]),
+            Span::from(&info.description[i..j]).yellow().bold(),
+            Span::from(&info.description[j..]),
+        ])
+    } else {
+        Line::from_iter([Span::from("    "), Span::from(&info.description)])
+    };
 
-        let description_l = if let Some(i) = self.info.description.to_lowercase().find(self.query) {
-            let j = i + self.query.chars().count();
-            Line::from_iter([
-                Span::from("    "),
-                Span::from(&self.info.description[..i]),
-                Span::from(&self.info.description[i..j]).yellow().bold(),
-                Span::from(&self.info.description[j..]),
-            ])
-        } else {
-            Line::from_iter([Span::from("    "), Span::from(&self.info.description)])
-        };
+    let homepage_l = Line::from_iter([
+        Span::from("\u{1F310}  "),
+        Span::from(&info.homepage).magenta(),
+    ]);
 
-        let homepage_l = Line::from_iter([
-            Span::from("\u{1F310}  "),
-            Span::from(&self.info.homepage).magenta(),
-        ]);
+    let license_l = Line::from_iter([Span::from("\u{1F4DC}  "), Span::from(&info.license).green()]);
 
-        let license_l = Line::from_iter([
-            Span::from("\u{1F4DC}  "),
-            Span::from(&self.info.license).green(),
-        ]);
+    let notes_l = if let Some(notes) = &info.notes {
+        Line::from_iter([Span::from("\u{1F4DA}  "), Span::from(notes)])
+    } else {
+        Line::default()
+    };
 
-        let notes_l = if let Some(notes) = &self.info.notes {
-            Line::from_iter([Span::from("\u{1F4DA}  "), Span::from(notes)])
-        } else {
-            Line::default()
-        };
+    let text = Text::from_iter([name_l, description_l, homepage_l, license_l, notes_l]);
+    let para = Paragraph::new(text)
+        .block(Block::bordered())
+        .wrap(Wrap { trim: false });
 
-        let text = Text::from_iter([name_l, description_l, homepage_l, license_l, notes_l]);
-        let para = Paragraph::new(text)
-            .block(Block::bordered())
-            .wrap(Wrap { trim: false });
-
-        para.render(area, buf);
-    }
+    f.render_widget(para, area);
 }
