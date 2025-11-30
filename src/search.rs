@@ -1,8 +1,6 @@
-use anyhow::Context;
+use crate::{error::MyError, manifest::AppManifest};
 
-use crate::manifest::AppManifest;
-
-pub fn search(args: &crate::ArgParser) -> anyhow::Result<Vec<AppInfo>> {
+pub fn search(args: &crate::ArgParser) -> Result<Vec<AppInfo>, MyError> {
     let query = &args.query;
 
     let scoop_config = crate::config::load();
@@ -11,27 +9,16 @@ pub fn search(args: &crate::ArgParser) -> anyhow::Result<Vec<AppInfo>> {
 
     let mut apps = Vec::with_capacity(50);
 
-    for ele in scoop_buckets_path
-        .read_dir()
-        .context("Failed to read scoop buckets dir")?
-    {
+    for ele in scoop_buckets_path.read_dir()? {
         let bucket = ele?;
         let bucket_name = bucket.file_name().display().to_string();
 
-        for ele in bucket
-            .path()
-            .join("bucket")
-            .read_dir()
-            .context(format!("Failed to read bucket `{bucket_name}`"))?
-        {
+        for ele in bucket.path().join("bucket").read_dir()? {
             let app_manifest = ele?;
             if let Some(appname) = app_manifest.path().file_stem() {
                 let appname = appname.display().to_string();
-                let manifest: AppManifest = serde_json::from_slice(
-                    &std::fs::read(app_manifest.path())
-                        .context(format!("Failed to read manifest `{appname}`"))?,
-                )
-                .context(format!("Failed to deserialize `{appname}`"))?;
+                let manifest: AppManifest =
+                    serde_json::from_slice(&std::fs::read(app_manifest.path())?)?;
 
                 if appname.to_lowercase().contains(&query.to_lowercase())
                     || manifest

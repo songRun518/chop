@@ -9,7 +9,7 @@ use ratatui::{
     widgets::{Block, List, ListItem, ListState, Paragraph, Widget, Wrap},
 };
 
-use crate::search::AppInfo;
+use crate::{error::MyError, search::AppInfo};
 
 mod config;
 mod error;
@@ -25,7 +25,7 @@ struct ArgParser {
     scoop_root_path: Option<PathBuf>,
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> Result<(), MyError> {
     let args = ArgParser::parse();
     let apps = search::search(&args)?;
 
