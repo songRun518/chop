@@ -1,0 +1,1 @@
+target/debug/chop -p /home/songrun/Documents/scoopRoot rust
